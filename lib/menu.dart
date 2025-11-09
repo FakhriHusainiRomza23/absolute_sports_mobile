@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:absolute_sports/app_drawer.dart';
+import 'package:absolute_sports/product_form_page.dart';
 
 
 class MyHomePage extends StatelessWidget {
@@ -45,7 +47,8 @@ class MyHomePage extends StatelessWidget {
         // Warna latar belakang AppBar diambil dari skema warna tema aplikasi.
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      // Body halaman dengan padding di sekelilingnya.
+  drawer: const AppDrawer(),
+  // Body halaman dengan padding di sekelilingnya.
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         // Menyusun widget secara vertikal dalam sebuah kolom.
@@ -135,12 +138,19 @@ class ItemCard extends StatelessWidget {
       child: InkWell(
         // Aksi ketika kartu ditekan.
         onTap: () {
-          // Menampilkan pesan SnackBar saat kartu ditekan.
-      ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-        SnackBar(content: Text(item.message))
+          // Jika item adalah Tambah Produk / Create Product, arahkan ke halaman form
+          if (item.name == 'Create Product' || item.name == 'Tambah Produk') {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ProductFormPage()),
             );
+          } else {
+            // Menampilkan pesan SnackBar untuk item lainnya
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                  SnackBar(content: Text(item.message))
+              );
+          }
         },
         // Container untuk menyimpan Icon dan Text
         child: Container(

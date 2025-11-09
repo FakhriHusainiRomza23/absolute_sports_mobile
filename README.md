@@ -68,3 +68,45 @@ Catatan: `ItemHomepage` adalah model/data holder (bukan widget) yang menyimpan n
 - Hot restart:
 	- Merestart aplikasi dari awal (menjalankan ulang `main()`), menghapus seluruh state in-memory.
 	- Berguna ketika perubahan menyentuh inisialisasi global, struktur state, atau ketika hot reload tidak mencerminkan perubahan yang diinginkan.
+
+---
+
+## Tugas 8: Navigation, Layouts, Forms, and Input Elements
+
+### Navigasi, Drawer, dan Struktur Halaman
+- Aplikasi menggunakan `Scaffold`, `AppBar`, `Drawer` untuk konsistensi struktur di tiap halaman.
+- Drawer memiliki dua opsi: "Halaman Utama" dan "Tambah Produk". Keduanya menavigasi menggunakan `Navigator` ke halaman yang sesuai.
+- Tile grid "Create Product/Tambah Produk" di halaman utama juga mengarahkan ke halaman form.
+
+### Halaman Form Tambah Produk
+- Input minimal yang dibuat:
+	- `name` (TextFormField, min 3 karakter)
+	- `price` (TextFormField angka, > 0)
+	- `description` (TextFormField multi-line, min 10 karakter)
+- Input tambahan sesuai model Football Shop:
+	- `thumbnail` (TextFormField URL, wajib http/https, valid URL)
+	- `category` (DropdownButtonFormField; contoh: Jersey, Sepatu, Bola, Aksesoris)
+	- `isFeatured` (Switch)
+- Tombol `Save` akan memvalidasi form. Jika valid, akan memunculkan pop-up (AlertDialog) berisi ringkasan data yang diisi.
+
+### Jawaban Pertanyaan
+1) Perbedaan `Navigator.push()` vs `Navigator.pushReplacement()` dan kapan digunakan?
+	 - `push()`: Menambahkan halaman baru di atas stack. Pengguna bisa kembali ke halaman sebelumnya (back).
+		 - Cocok saat membuka halaman Form Tambah Produk dari Halaman Utama, karena pengguna mungkin ingin kembali tanpa menyimpan perubahan.
+	 - `pushReplacement()`: Mengganti halaman saat ini dengan halaman baru (halaman lama dihapus dari stack).
+		 - Cocok untuk alur yang tidak perlu kembali, misalnya setelah proses selesai (sukses submit) dan ingin langsung ke Halaman Utama tanpa kembali ke form lama.
+
+2) Memanfaatkan hierarchy `Scaffold`, `AppBar`, dan `Drawer` untuk struktur konsisten:
+	 - `Scaffold` menjadi kerangka tiap halaman: area `appBar`, `body`, dan `drawer` konsisten.
+	 - `AppBar` menyajikan judul/aplikasi dan identitas halaman.
+	 - `Drawer` menyediakan navigasi global antar-halaman utama (Home dan Tambah Produk) sehingga pengalaman navigasi konsisten.
+
+3) Kelebihan `Padding`, `SingleChildScrollView`, dan `ListView` pada form dan contoh penggunaannya:
+	 - `Padding`: Memberi ruang agar form tidak menempel ke tepi layar, meningkatkan keterbacaan.
+	 - `SingleChildScrollView`: Mencegah overflow saat keyboard muncul atau layar kecil; form dapat discroll.
+	 - `ListView` (atau `Column` di dalam `SingleChildScrollView`): Menyusun elemen secara vertikal dan fleksibel.
+	 - Contoh di aplikasi: Halaman `ProductFormPage` menggunakan `SingleChildScrollView` + `Padding` + `Form` dengan beberapa `TextFormField`, `DropdownButtonFormField`, `SwitchListTile`, dan tombol `Save` agar tetap nyaman digunakan di berbagai ukuran layar.
+
+4) Menyesuaikan warna tema agar konsisten dengan brand Football Shop:
+	 - Menggunakan `ThemeData` dan `ColorScheme` pada `MaterialApp` untuk menentukan warna utama/sekunder.
+	 - Komponen seperti `AppBar`, `DrawerHeader`, dan tombol dapat menggunakan warna konsisten (misal biru sebagai warna utama brand, aksen sesuai kebutuhan) agar identitas visual menyatu.
