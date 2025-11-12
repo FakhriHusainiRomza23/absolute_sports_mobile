@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:absolute_sports/menu.dart';
+import 'package:absolute_sports/screens/menu.dart';
 
 void main() {
   runApp(const MyApp());

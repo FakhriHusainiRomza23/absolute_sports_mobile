@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:absolute_sports/menu.dart';
-import 'package:absolute_sports/product_form_page.dart';
+import 'package:absolute_sports/screens/menu.dart';
+import 'package:absolute_sports/screens/product_form_page.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -28,7 +28,7 @@ class AppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.home),
-              title: const Text('Halaman Utama'),
+              title: const Text('Home'),
               onTap: () {
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => MyHomePage()),
@@ -38,7 +38,7 @@ class AppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.add_circle),
-              title: const Text('Tambah Produk'),
+              title: const Text('Add Products'),
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const ProductFormPage()),

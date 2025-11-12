@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:absolute_sports/app_drawer.dart';
+import 'package:absolute_sports/widgets/app_drawer.dart';
 
 class ProductFormPage extends StatefulWidget {
   const ProductFormPage({super.key});
@@ -71,7 +71,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Produk'),
+        title: const Text('Add Products'),
       ),
       drawer: const AppDrawer(),
       body: SingleChildScrollView(
