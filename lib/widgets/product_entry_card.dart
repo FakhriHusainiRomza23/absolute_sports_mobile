@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:absolute_sports/models/product_entry.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class ProductEntryCard extends StatelessWidget {
   final ProductEntry product;
@@ -14,20 +15,18 @@ class ProductEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Platform aware base host for proxy endpoint.
-    String base;
-    if (kIsWeb) {
-      base = 'http://localhost:8000';
+    final request = context.watch<CookieRequest>();
+    final String? currentUsername = request.jsonData['username']?.toString();
+    String ownerLabel;
+    if (product.userUsername != null && currentUsername != null) {
+      ownerLabel = product.userUsername!.toLowerCase() == currentUsername.toLowerCase()
+          ? 'Owner: You'
+          : 'Owner: ${product.userUsername}';
+    } else if (product.userUsername != null) {
+      ownerLabel = 'Owner: ${product.userUsername}';
     } else {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-          base = 'http://10.0.2.2:8000';
-          break;
-        default:
-          base = 'http://localhost:8000';
-      }
+      ownerLabel = 'Owner: Unknown';
     }
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: InkWell(
@@ -45,31 +44,23 @@ class ProductEntryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Thumbnail
-                if ((product.thumbnail ?? '').isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.network(
-                      '$base/proxy-image/?url=${Uri.encodeComponent(product.thumbnail ?? '')}',
-                      height: 150,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 150,
-                        color: Colors.grey[300],
-                        child: const Center(child: Icon(Icons.broken_image)),
-                      ),
-                    ),
-                  )
-                else
-                  Container(
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.network(
+                    'http://localhost:8000/proxy-image/?url=${Uri.encodeComponent(product.thumbnail?? '')}',
                     height: 150,
                     width: double.infinity,
-                    color: Colors.grey[300],
-                    child: const Center(child: Icon(Icons.image_not_supported)),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 150,
+                      color: Colors.grey[300],
+                      child: const Center(child: Icon(Icons.broken_image)),
+                    ),
                   ),
+                ),
                 const SizedBox(height: 8),
 
-                // Title
+                // Product name
                 Text(
                   product.name,
                   style: const TextStyle(
@@ -81,11 +72,10 @@ class ProductEntryCard extends StatelessWidget {
 
                 // Price
                 Text(
-                  'Price: Rp ${product.price}',
+                  'Rp ${product.price}',
                   style: const TextStyle(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.green,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -94,7 +84,11 @@ class ProductEntryCard extends StatelessWidget {
                 Text('Category: ${product.category}'),
                 const SizedBox(height: 6),
 
-                // Content preview
+                // Owner label
+                Text(ownerLabel),
+                const SizedBox(height: 6),
+
+                // Description preview
                 Text(
                   product.description.length > 100
                       ? '${product.description.substring(0, 100)}...'

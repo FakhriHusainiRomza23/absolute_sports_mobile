@@ -19,6 +19,8 @@ class ProductEntry {
     bool isFeatured;
     bool isHot;
     int? userId;
+        String? userUsername;
+
 
     ProductEntry({
         required this.id,
@@ -31,6 +33,7 @@ class ProductEntry {
         required this.isFeatured,
         required this.isHot,
         required this.userId,
+        this.userUsername,
     });
 
     factory ProductEntry.fromJson(Map<String, dynamic> json) => ProductEntry(
@@ -44,6 +47,7 @@ class ProductEntry {
         isFeatured: json["is_featured"],
         isHot: json["is_hot"],
         userId: json["user_id"],
+        userUsername: json["user_username"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -57,5 +61,6 @@ class ProductEntry {
         "is_featured": isFeatured,
         "is_hot": isHot,
         "user_id": userId,
+        "user_username": userUsername,
     };
 }
