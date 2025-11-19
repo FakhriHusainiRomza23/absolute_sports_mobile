@@ -79,7 +79,7 @@ class _ProductEntryListPageState extends State<ProductEntryListPage> {
               return const Column(
                 children: [
                   Text(
-                    'There are no product in We\'ballin shops.',
+                    'There are no product in Absolute Sports.',
                     style: TextStyle(fontSize: 20, color: Color(0xff59A5D8)),
                   ),
                   SizedBox(height: 8),

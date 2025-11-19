@@ -18,14 +18,15 @@ class _ProductFormPageState extends State<ProductFormPage> {
     String _name = "";
     int _price = 0; // default
     String _description = "";
-    String _category = "Footwear"; // default
+    String _category = "Shoes"; // default
     String _thumbnail = "";
     bool _isFeatured = false; // default
 
     final List<String> _categories = [
-      'Footwear',
-      'Clothing',
+      'Shoes',
+      'Jersey',
       'Accessories',
+      'Socks'
     ];
 
     bool isUrl(String input) {
@@ -241,7 +242,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                             if (response['status'] == 'success') {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(const SnackBar(
-                                content: Text("News successfully saved!"),
+                                content: Text("Product successfully saved!"),
                               ));
                               Navigator.pushReplacement(
                                 context,

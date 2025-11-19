@@ -16,7 +16,7 @@ class MyHomePage extends StatelessWidget {
 
     final List<ItemHomepage> items = [
     ItemHomepage("All Products", Icons.store, Colors.lightBlue),
-    ItemHomepage("My Produts", Icons.person, Colors.lightGreen),
+    ItemHomepage("My Products", Icons.person, Colors.lightGreen),
     ItemHomepage("Create Product", Icons.add, Colors.red),
     ItemHomepage("Logout", Icons.logout, Colors.grey),
     ];
@@ -71,7 +71,7 @@ class MyHomePage extends StatelessWidget {
                     const Padding(
                       padding: EdgeInsets.only(top: 16.0),
                       child: Text(
-                        'Selamat datang di Football Shop',
+                        'Selamat datang di Absolute Sports',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18.0,
