@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:absolute_sports/screens/menu.dart';
 import 'package:absolute_sports/screens/product_form_page.dart';
+import 'package:absolute_sports/screens/product_entry_list.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -45,6 +46,17 @@ class AppDrawer extends StatelessWidget {
                 );
               },
             ),
+            ListTile(
+    leading: const Icon(Icons.add_reaction_rounded),
+    title: const Text('Product List'),
+    onTap: () {
+        // Route to product list page
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProductEntryListPage()),
+        );
+    },
+),
           ],
         ),
       ),

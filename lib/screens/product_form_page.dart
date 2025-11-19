@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:absolute_sports/widgets/app_drawer.dart';
+import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:absolute_sports/screens/menu.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 
 class ProductFormPage extends StatefulWidget {
   const ProductFormPage({super.key});
@@ -33,34 +38,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
     super.dispose();
   }
 
-  void _showSummaryDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Produk Tersimpan'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                Text('Name: ${_nameController.text}'),
-                Text('Price: ${_priceController.text}'),
-                Text('Description: ${_descriptionController.text}'),
-                Text('Thumbnail: ${_thumbnailController.text}'),
-                Text('Category: ${_category ?? '-'}'),
-                Text('Featured: ${_isFeatured ? 'Ya' : 'Tidak'}'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // Removed local summary dialog (replaced by server POST SnackBar feedback)
 
   bool _isValidUrl(String value) {
     final uri = Uri.tryParse(value);
@@ -69,6 +47,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Products'),
@@ -185,9 +165,69 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.save),
                   label: const Text('Save'),
-                  onPressed: () {
-                    if (_formKey.currentState?.validate() == true) {
-                      _showSummaryDialog();
+                  onPressed: () async {
+                    if (_formKey.currentState?.validate() != true) return;
+
+                    // Collect values
+                    final name = _nameController.text.trim();
+                    final price = int.parse(_priceController.text.trim());
+                    final description = _descriptionController.text.trim();
+                    final thumbnail = _thumbnailController.text.trim();
+                    final category = _category;
+                    final isFeatured = _isFeatured;
+
+                    // Platform-aware base URL (tutorial style)
+                    String base;
+                    if (kIsWeb) {
+                      base = 'http://localhost:8000';
+                    } else {
+                      switch (defaultTargetPlatform) {
+                        case TargetPlatform.android:
+                          base = 'http://10.0.2.2:8000';
+                          break;
+                        default:
+                          base = 'http://localhost:8000';
+                      }
+                    }
+
+                    try {
+                      final response = await request.postJson(
+                        '$base/create-flutter/',
+                        jsonEncode({
+                          'name': name,
+                          'price': price,
+                          'description': description,
+                          'thumbnail': thumbnail,
+                          'category': category,
+                          'is_featured': isFeatured,
+                        }),
+                      );
+
+                      if (!mounted) return;
+                      if (response['status'] == 'success') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Product successfully saved!')),
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => MyHomePage()),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(response['message'] ?? 'Something went wrong, please try again.')),
+                        );
+                      }
+                    } on FormatException catch (fe) {
+                      if (!mounted) return;
+                      // Likely HTML received instead of JSON
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Format error (HTML/non-JSON response). Periksa view Django: ${fe.message}')),
+                      );
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Request failed: $e')),
+                      );
                     }
                   },
                 ),
