@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:absolute_sports/screens/login.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -116,28 +115,17 @@ class _RegisterPageState extends State<RegisterPage> {
                       String password1 = _passwordController.text;
                       String password2 = _confirmPasswordController.text;
 
-                      // Choose base URL per platform per tutorial note
-                      String base;
-                      if (kIsWeb) {
-                        base = 'http://localhost:8000';
-                      } else {
-                        switch (defaultTargetPlatform) {
-                          case TargetPlatform.android:
-                            base = 'http://10.0.2.2:8000';
-                            break;
-                          default:
-                            base = 'http://localhost:8000';
-                        }
-                      }
-
+                      // Check credentials
+                      // TODO: Change the URL and don't forget to add trailing slash (/) at the end of URL!
+                      // To connect Android emulator with Django on localhost, use URL http://10.0.2.2/
+                      // If you using chrome,  use URL http://localhost:8000       
                       final response = await request.postJson(
-                        "$base/auth/register/",
-                        jsonEncode({
-                          "username": username,
-                          "password1": password1,
-                          "password2": password2,
-                        }),
-                      );
+                          "http://localhost:8000/auth/register/",
+                          jsonEncode({
+                            "username": username,
+                            "password1": password1,
+                            "password2": password2,
+                          }));
                       if (context.mounted) {
                         if (response['status'] == 'success') {
                           ScaffoldMessenger.of(context).showSnackBar(

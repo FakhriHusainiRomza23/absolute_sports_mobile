@@ -1,20 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:absolute_sports/models/product_entry.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final ProductEntry product;
 
   const ProductDetailPage({super.key, required this.product});
 
-  String _baseUrl() {
-    if (kIsWeb) return 'http://localhost:8000';
-    if (defaultTargetPlatform == TargetPlatform.android) return 'http://10.0.2.2:8000';
-    return 'http://localhost:8000';
+  String _formatDate(DateTime date) {
+    // Simple date formatter without intl package
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${date.day} ${months[date.month - 1]} ${date.year}, ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
+
+  String formatRupiah(num price, {String symbol = 'Rp'}) {
+  final formatted = price.toStringAsFixed(0).replaceAll(',', '.');
+  return '$symbol $formatted';
+}
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
+    int? _extractUserId(Map<String, dynamic> jd) {
+      final dynamic idCandidate = jd['id'] ?? jd['user_id'] ?? jd['userId'] ??
+          (jd['user'] is Map ? jd['user']['id'] : null) ?? jd['pk'];
+      if (idCandidate is int) return idCandidate;
+      return idCandidate != null ? int.tryParse(idCandidate.toString()) : null;
+    }
+
+    final Map<String, dynamic> jd = Map<String, dynamic>.from(request.jsonData);
+    final int? currentUserId = _extractUserId(jd);
+    final String? currentUsername = jd['username']?.toString();
+    final bool isMine = (product.userUsername != null && currentUsername != null
+      ? product.userUsername!.toLowerCase() == currentUsername.toLowerCase()
+      : (product.userId != null && currentUserId != null && product.userId == currentUserId));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Detail'),
@@ -26,9 +48,9 @@ class ProductDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Thumbnail image
-            if ((product.thumbnail?.isNotEmpty ?? false))
+            if (product.thumbnail?.isNotEmpty ?? false)
               Image.network(
-                '${_baseUrl()}/proxy-image/?url=${Uri.encodeComponent(product.thumbnail!)}',
+                'http://localhost:8000/proxy-image/?url=${Uri.encodeComponent(product.thumbnail!)}',
                 width: double.infinity,
                 height: 250,
                 fit: BoxFit.cover,
@@ -75,23 +97,6 @@ class ProductDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // Price
-                  Row(
-                    children: [
-                      Icon(Icons.sell, size: 16, color: Colors.green[700]),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Rp ${product.price}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
                   // Category and Date
                   Row(
                     children: [
@@ -111,62 +116,46 @@ class ProductDetailPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
                       
                     ],
                   ),
                   const SizedBox(height: 8),
 
-                  // Views count
+                  // Price
                   Row(
                     children: [
-                      Icon(Icons.visibility, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
+                      const Icon(Icons.sell, size: 16),
+                      const SizedBox(width: 6),
                       Text(
-                        '${product.productViews} views',
+                        '${formatRupiah(product.price)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Owner info
+                  Row(
+                    children: [
+                      const Icon(Icons.person, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        product.userUsername != null
+                            ? (isMine ? 'Owner: You' : 'Owner: ${product.userUsername}')
+                            : (product.userId != null
+                                ? (isMine ? 'Owner: You' : 'Owner ID: ${product.userId}')
+                                : 'Owner: Unknown'),
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey[600],
+                          color: Colors.grey[700],
                         ),
                       ),
                     ],
                   ),
                   
-                  const Divider(height: 32),
-
-                  // Other attributes
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text('ID: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text(product.id),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Text('Featured: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text(product.isFeatured ? 'Yes' : 'No'),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Text('Hot: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text(product.isHot ? 'Yes' : 'No'),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Text('User ID: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text((product.userId?.toString() ?? '-')),
-                        ],
-                      ),
-                    ],
-                  ),
                   const Divider(height: 32),
 
                   // Full content
@@ -179,16 +168,6 @@ class ProductDetailPage extends StatelessWidget {
                     textAlign: TextAlign.justify,
                   ),
                   const SizedBox(height: 24),
-
-                  // Back button
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Back to list'),
-                    ),
-                  ),
                 ],
               ),
             ),

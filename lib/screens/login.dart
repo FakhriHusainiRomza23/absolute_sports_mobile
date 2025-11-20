@@ -1,9 +1,8 @@
 import 'package:absolute_sports/screens/menu.dart';
 import 'package:flutter/material.dart';
+import 'package:absolute_sports/screens/register.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:absolute_sports/screens/register.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 
 void main() {
   runApp(const LoginApp());
@@ -42,9 +41,11 @@ class _LoginPageState extends State<LoginPage> {
     final request = context.watch<CookieRequest>();
 
     return Scaffold(
-        appBar: AppBar(
-            title: const Text('Login'),
-        ),
+      appBar: AppBar(
+        title: const Text('Login'),
+        // Prevent showing a back arrow on the login page
+        automaticallyImplyLeading: false,
+      ),
         body: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -102,21 +103,8 @@ class _LoginPageState extends State<LoginPage> {
                       // TODO: Change the URL and don't forget to add trailing slash (/) at the end of URL!
                       // To connect Android emulator with Django on localhost, use URL http://10.0.2.2/
                       // If you using chrome,  use URL http://localhost:8000
-                      String base;
-                      if (kIsWeb) {
-                        base = 'http://localhost:8000';
-                      } else {
-                        switch (defaultTargetPlatform) {
-                          case TargetPlatform.android:
-                            base = 'http://10.0.2.2:8000';
-                            break;
-                          default:
-                            base = 'http://localhost:8000';
-                        }
-                      }
-
                       final response = await request
-                          .login("$base/auth/login/", {
+                          .login("http://localhost:8000/auth/login/", {
                         'username': username,
                         'password': password,
                       });
@@ -166,25 +154,25 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: const Text('Login'),
                   ),
-  const SizedBox(height: 36.0),
-  GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const RegisterPage(),
-        ),
-      );
-    },
-    child: Text(
-      'Don\'t have an account? Register',
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.primary,
-        fontSize: 16.0,
-      ),
-    ),
-  ),
-],
+                  const SizedBox(height: 36.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterPage(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Don\'t have an account? Register',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
